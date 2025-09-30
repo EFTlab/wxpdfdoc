@@ -29,6 +29,7 @@
 #include <wx/generic/prntdlgg.h>
 #include <wx/progdlg.h>
 #include <wx/paper.h>
+#include <wx/display.h>
 
 #include <wx/stattext.h>
 #include <wx/statbox.h>
@@ -56,10 +57,6 @@
 #include "wx/pdfdc.h"
 #include "wx/pdfprint.h"
 #include <wx/intl.h>
-
-#if !wxCHECK_VERSION(2, 9, 0)
-    #define wxPENSTYLE_USER_DASH wxUSER_DASH
-#endif
 
 // ----------------------------------------------------------------------------
 // PdfPrint data
@@ -573,6 +570,19 @@ wxPdfPrinter::Setup(wxWindow* WXUNUSED(parent))
 void
 wxPdfPrinter::GetPdfScreenPPI(int* x, int* y)
 {
+#if wxCHECK_VERSION(3,1,5)
+  wxDisplay display;
+
+  if (x)
+  {
+    *x = display.GetPPI().GetWidth();
+  }
+
+  if (y)
+  {
+    *y = display.GetPPI().GetHeight();
+  }
+#else
   wxScreenDC dc;
 
   if (x)
@@ -584,6 +594,7 @@ wxPdfPrinter::GetPdfScreenPPI(int* x, int* y)
   {
     *y = dc.GetPPI().GetHeight();
   }
+#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -693,13 +704,11 @@ wxPdfPrintPreview::PaintPage(wxPreviewCanvas* canvas, wxDC& dc)
   return m_pimpl->PaintPage(canvas, dc);
 }
 
-#if wxCHECK_VERSION(2,9,0)
 bool
 wxPdfPrintPreview::UpdatePageRendering()
 {
   return m_pimpl->UpdatePageRendering();
 }
-#endif
 
 bool
 wxPdfPrintPreview::DrawBlankPage(wxPreviewCanvas* canvas, wxDC& dc)
@@ -857,6 +866,19 @@ wxPdfPrintPreviewImpl::Print(bool interactive)
 void
 wxPdfPrintPreviewImpl::GetPdfScreenPPI(int* x, int* y)
 {
+#if wxCHECK_VERSION(3,1,5)
+  wxDisplay display;
+
+  if (x)
+  {
+    *x = display.GetPPI().GetWidth();
+  }
+
+  if (y)
+  {
+    *y = display.GetPPI().GetHeight();
+  }
+#else
   wxScreenDC dc;
 
   if (x)
@@ -868,6 +890,7 @@ wxPdfPrintPreviewImpl::GetPdfScreenPPI(int* x, int* y)
   {
     *y = dc.GetPPI().GetHeight();
   }
+#endif
 }
 
 void
@@ -935,9 +958,6 @@ wxPdfPrintPreviewImpl::DetermineScaling()
   m_currentZoom = 100;
 }
 
-#if wxCHECK_VERSION(2,9,0)
-// Version 2.9.x
-
 bool
 wxPdfPrintPreviewImpl::RenderPageIntoBitmap(wxBitmap& bmp, int pageNum)
 {
@@ -948,114 +968,6 @@ wxPdfPrintPreviewImpl::RenderPageIntoBitmap(wxBitmap& bmp, int pageNum)
 
   return RenderPageIntoDC(previewDC, pageNum);
 }
-
-#else
-// Version 2.8.x
-
-bool
-wxPdfPrintPreviewImpl::RenderPageIntoDCImpl(wxDC& dc, int pageNum)
-{
-  m_previewPrintout->SetDC(&dc);
-  m_previewPrintout->SetPageSizePixels(m_pageWidth, m_pageHeight);
-
-  // Need to delay OnPreparePrinting() until here, so we have enough
-  // information.
-  if (!m_printingPrepared)
-  {
-    m_previewPrintout->OnPreparePrinting();
-    int selFrom, selTo;
-    m_previewPrintout->GetPageInfo(&m_minPage, &m_maxPage, &selFrom, &selTo);
-    m_printingPrepared = true;
-  }
-
-  m_previewPrintout->OnBeginPrinting();
-
-  if (!m_previewPrintout->OnBeginDocument(m_printDialogData.GetFromPage(), m_printDialogData.GetToPage()))
-  {
-    wxMessageBox(wxS("Could not start document preview."), wxS("Print Preview Failure"), wxOK);
-    return false;
-  }
-
-  m_previewPrintout->OnPrintPage(pageNum);
-  m_previewPrintout->OnEndDocument();
-  m_previewPrintout->OnEndPrinting();
-
-  m_previewPrintout->SetDC(NULL);
-
-  return true;
-}
-
-bool
-wxPdfPrintPreviewImpl::RenderPageIntoBitmapImpl(wxBitmap& bmp, int pageNum)
-{
-  wxMemoryDC memoryDC;
-  memoryDC.SelectObject(bmp);
-  memoryDC.Clear();
-  wxPdfPreviewDC previewDC(memoryDC, m_pdfPreviewDC);
-  return RenderPageIntoDCImpl(previewDC, pageNum);
-}
-
-bool
-wxPdfPrintPreviewImpl::RenderPage(int pageNum)
-{
-  wxBusyCursor busy;
-
-  if (!m_previewCanvas)
-  {
-    wxFAIL_MSG(wxS("wxPrintPreviewBase::RenderPage: must use wxPrintPreviewBase::SetCanvas to let me know about the canvas!"));
-    return false;
-  }
-
-  wxRect pageRect, paperRect;
-  CalcRects(m_previewCanvas, pageRect, paperRect);
-
-  if (!m_previewBitmap)
-  {
-    m_previewBitmap = new wxBitmap(pageRect.width, pageRect.height);
-
-    if (!m_previewBitmap || !m_previewBitmap->Ok())
-    {
-      if (m_previewBitmap)
-      {
-        delete m_previewBitmap;
-        m_previewBitmap = NULL;
-      }
-      wxMessageBox(wxS("Sorry, not enough memory to create a preview."), wxS("Print Preview Failure"), wxOK);
-      return false;
-    }
-  }
-
-  if (!RenderPageIntoBitmapImpl(*m_previewBitmap, pageNum))
-  {
-    wxMessageBox(wxS("Could not start document preview."), wxS("Print Preview Failure"), wxOK);
-
-    delete m_previewBitmap;
-    m_previewBitmap = NULL;
-    return false;
-  }
-
-#if wxUSE_STATUSBAR
-  wxString status;
-  if (m_maxPage != 0)
-  {
-    status = wxString::Format(wxS("Page %d of %d"), pageNum, m_maxPage);
-  }
-  else
-  {
-    status = wxString::Format(wxS("Page %d"), pageNum);
-  }
-
-  if (m_previewFrame)
-  {
-    m_previewFrame->SetStatusText(status);
-  }
-#endif
-
-  return true;
-}
-
-#endif
-
 
 //----------------------------------------------------------------------------
 // wxPdfPrintDialog
@@ -1965,24 +1877,24 @@ wxPdfPageSetupDialog::TransferMarginsToControls()
 {
   int unitSelection = m_marginUnits->GetSelection();
   double marginScaleToUnit;
-  wxChar* formatS;
+  wxString formatS;
 
   switch (unitSelection)
   {
     case 0:
       // mm
       marginScaleToUnit = 1.0;
-      formatS = (wxChar*)wxS("%.0f");
+      formatS = wxS("%.0f");
       break;
     case 1:
       // cm
       marginScaleToUnit = 0.1;
-      formatS = (wxChar*)wxS("%#.1f");
+      formatS = wxS("%#.1f");
       break;
     case 2:
       // inch
       marginScaleToUnit = 1.0 / 25.4;
-      formatS = (wxChar*)wxS("%#.2f");
+      formatS = wxS("%#.2f");
       break;
     default:
       wxLogError(_("Unknown margin unit format in margin to control transfer."));

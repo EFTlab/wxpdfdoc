@@ -1,6 +1,6 @@
 -- wxPdfDocument configuration file for premake5
 --
--- Copyright (C) 2017 Ulrich Telle <ulrich@telle-online.de>
+-- Copyright (C) 2017-2025 Ulrich Telle <github@telle-online.de>
 --
 -- This file is covered by the same licence as the entire wxpdfdoc package. 
 
@@ -11,7 +11,7 @@ dofile "premake/wxwidgets.lua"
 BUILDDIR = _OPTIONS["builddir"] or "build"
 
 workspace "wxpdfdoc"
-  configurations { "Debug", "Release", "Debug wxDLL", "Release wxDLL", "DLL Debug", "DLL Release" }
+  configurations { "Debug", "Release", "Debug wxDLL", "Release wxDLL", "Debug DLL", "Release DLL" }
   platforms { "Win32", "Win64" }
   location(BUILDDIR)
 
@@ -33,6 +33,7 @@ workspace "wxpdfdoc"
 project "wxpdfdoc"
   location(BUILDDIR)
   language "C++"
+  cppdialect "C++11"
 
   if (is_msvc) then
     local prj = project()
@@ -45,19 +46,32 @@ project "wxpdfdoc"
 
   make_filters( "PDFDOC", "wxpdfdoc", "core,xml" )
 
-  files { "src/*.cpp", "src/*.inc", "src/*.rc", "include/wx/*.h" }
+  files { "src/*.cpp", "src/*.inc", "src/*.rc", "include/wx/*.h",
+          "src/crypto/*.cpp", "src/crypto/*.h",
+          "src/woff/*.cpp", "src/woff/*.h"
+        }
   vpaths {
     ["Header Files"] = { "**.h", "**.inc" },
     ["Source Files"] = { "**.cpp", "**.rc" }
   }
-  includedirs { "include" }
+  includedirs { "include",
+                "thirdparty/woff2/include",
+                "thirdparty/zint/backend/fonts",
+                "thirdparty/zint/backend"
+              }
   characterset "Unicode"
+  links { "libwoff2", "libzint" }
 
+-- Third party libraries
+
+dofile "premake5_woff2.lua"
+dofile "premake5_zint.lua"
 
 -- Minimal sample
 project "minimal"
   location(BUILDDIR)
   language "C++"
+  cppdialect "C++11"
   kind "ConsoleApp"
 
   if (is_msvc) then
@@ -84,6 +98,7 @@ project "minimal"
 project "dcsample"
   location(BUILDDIR)
   language "C++"
+  cppdialect "C++11"
   kind "WindowedApp"
 
   if (is_msvc) then
@@ -111,6 +126,7 @@ project "dcsample"
 project "makefont"
   location(BUILDDIR)
   language "C++"
+  cppdialect "C++11"
   kind "ConsoleApp"
 
   if (is_msvc) then
@@ -137,6 +153,7 @@ project "makefont"
 project "showfont"
   location(BUILDDIR)
   language "C++"
+  cppdialect "C++11"
   kind "ConsoleApp"
 
   if (is_msvc) then

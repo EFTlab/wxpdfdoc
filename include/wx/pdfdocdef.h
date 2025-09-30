@@ -1,11 +1,12 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        pdfdocdef.h
-// Purpose:
-// Author:      Ulrich Telle
-// Created:     2005-08-04
-// Copyright:   (c) Ulrich Telle
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+/*
+** Name:        pdfdocdef.h
+** Purpose:     Compile time definitions and documentation
+** Author:      Ulrich Telle
+** Created:     2005-08-04
+** Copyright:   (c) 2005-2025 Ulrich Telle
+** Licence:     wxWindows licence
+** SPDX-License-Identifier: LGPL-3.0+ WITH WxWindows-exception-3.1
+*/
 
 /// \file pdfdocdef.h Compile time switches for the \b wxPdfDocument component
 
@@ -15,10 +16,9 @@
 
 wxPdfDocument is a C++ class which allows wxWidgets applications to generate PDF files.
 The code is a port of <a href="http://www.fpdf.org"><b>FPDF</b></a> - a free PHP class for
-generating PDF files - to C++ using the <a href="http://www.wxwidgets.org"><b>wxWidgets</b></a>
+generating PDF files - to C++ using the <a href="https://www.wxwidgets.org"><b>wxWidgets</b></a>
 library. wxPdfDocument does not make use of any libraries like
-<a href="http://www.pdflib.com"><b>PDFlib</b></a> or
-<a href="http://www.fastio.com"><b>ClibPDF</b></a> which require a fee at least for
+<a href="https://www.pdflib.com"><b>PDFlib</b></a> which require a fee at least for
 commercial usage. wxPdfDocument is published under the <b>wxWidgets (formerly wxWindows)
 license</b>. This means you may use it for any kind of usage and modify it to suit your needs.
 
@@ -69,6 +69,141 @@ Or you can send a mail to the author
 \section version Version history
 
 <dl>
+<dt><b>1.3.1</b> - <i>April 2025</i></dt>
+<dd>
+Fixed bugs:<br>
+- Adjusted make files to properly handle white space in path names (issue #96)
+
+</dd>
+
+<dt><b>1.3.0</b> - <i>February 2025</i></dt>
+<dd>
+Changes:<br>
+- Added support for fonts in <i>Web Open Font Format</i> (WOFF/WOFF2)
+- Added support for TrueType/OpenType fonts given as byte arrays
+- Added support for additional barcodes (especially 2D barcodes like QR code, DataMatrix etc).
+  In principle, all barcodes supported by the <a href="https://zint.org.uk/"><b>Zint library</b></a> can be used.
+
+Fixed bugs:<br>
+- Fixed wxPdfDocument::Translate by adding missing unit conversion factor
+
+</dd>
+
+<dt><b>1.2.1</b> - <i>January 2025</i></dt>
+<dd>
+Changes:<br>
+- Improved font lookup in wxPdfFontManager to search also under the font family alias, if given
+- Replaced use of wxScreenDC by wxDisplay
+- Restored support for wxWidgets 3.0.x
+
+Fixed bugs:<br>
+- Check for availability of header file Security/SecRandom.h
+- Fixed wxPdfDCImpl::DoDrawText for multiline text
+
+</dd>
+
+<dt><b>1.2.0</b> - <i>February 2024</i></dt>
+<dd>
+Changes:<br>
+- Added support for document protection with AES-256 encryption (PDF 2.0).
+- Added support for importing PDF documents protected with AES encryption.
+
+Fixed bugs:<br>
+- Fixed problem with page breaks in XML tables.
+
+<b>Notes:</b><br>
+- The library now requires a C++11 compiler for compilation.
+- Build support for Visual C++ versions below 2015 has been removed.
+
+</dd>
+
+<dt><b>1.1.0</b> - <i>January 2024</i></dt>
+<dd>
+wxPdfDocument is compatible with wxWidgets versions 3.0.x, 3.1.x and 3.2.x.
+
+Changes:<br>
+- Support for negative coordinates in all graphics operations.
+- Changed signatures of methods ScaleX(), ScaleY(), ScaleXY(), Scale(), MirrorH(), MirrorV(), SkewX(), SkewY(), Skew(), Rotate(), and UseTemplate().
+If an application had explicitly specified the default value (-1) in calls to one of those methods,
+these values have to be replaced by calls to method GetX() resp GetY().
+
+Fixed bugs:<br>
+- Fixed issue "Rotated text at wrong position". The problem arose from the use of negative coordinates. All graphics operations now support negative coordinates, too.
+- Fixed output of wrong text background colour for rotated text in wxPdfDC.
+
+</dd>
+
+<dt><b>1.0.3</b> - <i>November 2023</i></dt>
+<dd>
+wxPdfDocument is compatible with wxWidgets versions 3.0.x, 3.1.x and 3.2.x.
+
+General changes:<br>
+- Updated Unicode data for ShowFont utility
+
+Fixed bugs:<br>
+- Fixed handling of long table: take top page margin, page header and table header into account for page breaks.
+- Fixed handling for empty table bodies.
+- Fixed handling of the height of (optional) table header rows (taking it into account for calculating table parts fitting on a page).
+- Fixed isue #81. Improve handling of table cell borders in markup. Table cell borders could be (partially) hidden by table cell backgrounds.
+- Actually use wxPdfDocument::GetImageSize() MIME type parameter.
+- Fixed handling of surrogates for TrueType fonts.
+- Fixed problem with automatic page break
+
+</dd>
+
+<dt><b>1.0.2</b> - <i>December 2021</i></dt>
+<dd>
+wxPdfDocument is compatible with wxWidgets versions 3.0.x and 3.1.x.
+
+General changes:<br>
+- Added attribute "viewport" for XML markup element "img"
+- Added option to specify the unit for numeric attributes in XML markup elements
+- Slightly optimized handling for the XML markup element "img"
+- Added new flag wxPDF_VIEWER_NOPRINTSCALING for method wxPdfDocument::SetViewerPreferences
+- Added method wxPdfDocument::SetPaperHandling for better printout handling
+
+Fixed bugs:<br>
+- Fixed markup handling for paragraphs in table cells
+- Fixed markup table handling (wrong total height used to reserve space)
+- Fixed justification issue in markup text
+- Adjusted handling of pens and brushes in wxPdfDC
+
+</dd>
+
+<dt><b>1.0.1</b> - <i>September 2021</i></dt>
+<dd>
+wxPdfDocument is compatible with wxWidgets versions 3.0.x and 3.1.x.
+
+Fixed bugs:<br>
+- Fixed hatch pattern scaling in wxPdfDC
+- Fixed compile time error in ANSI mode
+- Fixed some documentation glitches
+
+</dd>
+
+<dt><b>1.0.0</b> - <i>September 2021</i></dt>
+<dd>
+wxPdfDocument is compatible with wxWidgets versions 3.0.x and 3.1.x.
+
+General changes:<br>
+- Remove support for wxWidgets 2.x
+- Added support for PDF/A-1B conformance
+- Added transformation matrix support for wxPdfDC
+- Added attribute "char-spacing" for XML markup element "span"
+- Added maximum height attribute for table rows in XML markup
+- Implemented extended support for fill patterns (template based patterns, various hatch patterns)
+- Enhanced support for wxBrush styles in wxPdfDC (stipple and hatch styles)
+- Changed data type of image measures in XML markup (from integer to double)
+- Optimized wxPdfDC output (setting of pens, brushes, state changes)
+
+Fixed bugs:<br>
+- Fixed issue with bitmap images in wxPdfDC (now using globally unique identifiers)
+- Fixed wxPdfDC issue with pen and brush color
+- Fixed issue with patterns in templates
+- Use the transparent background mode by default (relevant for alpha support in wxPdfDC)
+
+</dd>
+
 <dt><b>0.9.8</b> - <i>September 2019</i></dt>
 <dd>
 wxPdfDocument is compatible with wxWidgets versions 2.8.12, 3.0.x and 3.1.x.
@@ -334,8 +469,8 @@ Added features:<br>
 
 wxPdfDocument is compatible with wxWidgets version 2.8.0 as well as with version 2.6.x.
 
-As an add-on preprocessed font files for the free <a href="http://dejavu.sourceforge.net">DejaVu fonts</a>
-(version 2.12) are provided in the file release <b><a href="http://sourceforge.net/project/showfiles.php?group_id=51305&package_id=45182&release_id=468705">wxPdfDocument Add-Ons</a></b>.
+As an add-on preprocessed font files for the free <a href="https://dejavu-fonts.github.io/">DejaVu fonts</a>
+(version 2.12) are provided in the file release <b><a href="https://sourceforge.net/project/showfiles.php?group_id=51305&package_id=45182&release_id=468705">wxPdfDocument Add-Ons</a></b>.
 
 <b>Attention</b>: For supporting font subsetting for ordinary non-Unicode TrueType fonts
 the format of the font definition files has been extended. Font definition files created
@@ -343,7 +478,7 @@ with prior versions of the \ref makefont are still usable, but do not support fo
 It is recommended to regenerate own font definition files. Unfortunately common AFM font metric
 files do not contain glyph information which is required by the \ref makefont to create the
 character-to-glyph mapping. Therefore the utility <tt>ttf2ufm</tt> had to be changed.
-The modified version including a Windows executable is available in the file release <b><a href="http://sourceforge.net/project/showfiles.php?group_id=51305&package_id=45182&release_id=468705">wxPdfDocument Add-Ons</a></b>.
+The modified version including a Windows executable is available in the file release <b><a href="https://sourceforge.net/project/showfiles.php?group_id=51305&package_id=45182&release_id=468705">wxPdfDocument Add-Ons</a></b>.
 </dd>
 
 <dt><b>0.7.6</b> - <i>October 2006</i></dt>
@@ -445,21 +580,22 @@ potential combinations. <b>If you find bugs please report them to the author!</b
 
 \section acknowledgement Acknowledgements
 
-I'm very grateful to <b>Bruno Lowagie</b>, the main author of the <b>iText Java library</b>
-(http://www.lowagie.com/iText), for allowing to take lots of ideas and inspirations
-from this great Java PDF library. Especially the font handling and font subsetting
+I'm very grateful to <a href="https://www.lowagie.com"><b>Bruno Lowagie</b></a>, the main author of the <a href="https://itextpdf.com/"><b>iText Java library</b></a>,
+for allowing to take lots of ideas and inspirations from this great Java PDF library. Especially the font handling and font subsetting
 was influenced in that way.
 
 Many thanks go to <b>Ben Moores</b> who provided code for layers and patterns he wrote for
-his PDF extension for <b>Mapnik</b> (http://www.mapnik.org). This code has been extended
+his PDF extension for <a href="http://www.mapnik.org"><b>Mapnik</b></a>. This code has been extended
 based on ideas from the <b>iText Java library</b> and was incorporated into wxPdfDocument.
 
-Support for Indic scripts is based on the efforts of <b>Ian Back</b>, creator of the PHP library \b mPDF
-(http://mpdf.bpm1.com); special thanks to <b>K Vinod Kumar</b> of the Centre for Development of Advanced
-Computing, Mumbai (http://www.cdacmumbai.in), for clearing license issues of the Raghu font series.
+Support for Indic scripts is based on the efforts of <b>Ian Back</b>, creator of the PHP library <a href="https://mpdf.github.io/"><b>mPDF</b></a>;
+special thanks to <b>K Vinod Kumar</b> of the <a href="https://www.cdac.in/"><b>Centre for Development of Advanced
+Computing, Mumbai</b></a>, for clearing license issues of the Raghu font series.
 
 Kudos to <b>Mark Dootson</b> for contributing major enhancements of wxPdfDC and it's integration
 into the wxWidgets printing framework.
+
+Kudos to <b>Dieter Schmeer</b> for contributing several enhancements for the XML markup handling.
 
 Since wxPdfDocument is based on the great \b FPDF PHP class and several of the contributions to it
 found on the <a href="http://www.fpdf.org"><b>FPDF website</b></a> I would like to thank
@@ -751,8 +887,7 @@ The first step for a \b TrueType font consists in generating the AFM file (or UF
 <b>Unicode TrueType</b> font). A utility exists to do this task: <tt>ttf2ufm</tt> - a special version of
 <tt>ttf2pt1</tt> - allowing to create AFM and/or UFM files. <tt>ttf2ufm</tt> has been modified to
 generate AFM and UFM files containing all the information which is required by the utility program
-\b makefont. An archive containing the modified source code of <tt>ttf2ufm</tt> and a Windows executable can be
-downloaded from <b><a href="http://wxcode.sourceforge.net/docs/wxpdfdoc/ttf2ufm.zip">here</a></b>.
+\b makefont.
 The command line to use is the following:
 
 <tt>ttf2ufm -a font.ttf font </tt>
@@ -780,7 +915,7 @@ To do this, a utility program, \b makefont, is provided.
 <tr><td><tt>-i</tt></td><td>Extract font metrics directly from <b>TrueType Unicode</b> or <b>OpenType Unicode</b> fonts</td></tr>
 <tr><td valign="top"><tt>-f font.{ttf|otf|pfb}</tt></td><td>font file (<tt>.ttf</tt> = TrueType, <tt>.otf</tt> = OpenType, <tt>.pfb</tt> = Type1).
 <br>If you own a Type1 font in ASCII format (<tt>.pfa</tt>), you can convert it to binary format with
-<a href="http://www.lcdf.org/~eddietwo/type/#t1utils">t1utils</a>.
+<a href="https://www.lcdf.org/~eddietwo/type/#t1utils">t1utils</a>.
 <br>If you don't want to embed the font, omit this parameter. In this case, type is given by the type parameter.
 </td></tr>
 <tr><td valign="top"><tt>-e encoding</tt></td><td>font encoding, i.e. cp1252. Omit this parameter for a symbolic font.like <i>Symbol</i>
@@ -890,9 +1025,9 @@ subsetting.
 
 \b ShowFont can be used to generate font samples in PDF form showing the Unicode
 coverage of the font similar in appearance to the Unicode charts. The concept of
-this application is based on <a href="http://fntsample.sourceforge.net">FntSample</a>,
-developed by Eugeniy Meshcheryakov for use with <a href="http://dejavu-fonts.org">DejaVu Fonts</a>
-project, but the code is written from scratch in C++ using <a href="http://www.wxwidgets.org">wxWidgets</a>
+this application is based on <a href="https://fntsample.sourceforge.net">FntSample</a>,
+developed by Eugeniy Meshcheryakov for use with <a href="https://dejavu-fonts.github.io/">DejaVu Fonts</a>
+project, but the code is written from scratch in C++ using <a href="https://www.wxwidgets.org">wxWidgets</a>
 and wxPdfDocument.
 
 \section useshowfont Usage
@@ -997,8 +1132,7 @@ and all attribute values must be enclosed in double quotes.
 
 Usually the current position should be at the left margin when calling wxPdfDocument::WriteXML.
 If the current position is \b not at left margin and the text passed to wxPdfDocument::WriteXML
-occupies more than a single line, you may get strange results. Until version \b 1.0 of wxPdfDocument
-will be released the behaviour of wxPdfDocument::WriteXML might change without prior notice.
+occupies more than a single line, you may get strange results.
 
 Currently there is only limited error handling. You will get strange results or no results at all
 if tags are incorrectly used. Unknown tags and all their content are silently ignored.
@@ -1006,6 +1140,31 @@ if tags are incorrectly used. Unknown tags and all their content are silently ig
 \section tagref Reference of supported tags
 
 The following sections describe the tags supported by the wxPdfDocument markup language.
+
+\subsection notes Notes
+
+Starting with version 1.0.2 of <b><i>wxPdfDocument</i></b> numeric values for the attributes of
+markup elements that denote measures (like margins, line widths, cell heights and so on) may include
+the measurement unit. If no unit is given, the default unit of the wxPdfDocument instance is assumed.
+The latter rule has 2 exceptions:
+- a font size is measured in points ("pt")
+- an image size (width, height, and viewport) is measured in pixels ("px")
+
+The following 2-letter units can be used:
+- <b>pt</b> = point (72 points = 1 inch)
+- <b>mm</b> = millimeter (25.4 millimeters = 1 inch)
+- <b>cm</b> = centimeter (2.54 centimeters = 1 inch)
+- <b>in</b> = inch
+- <b>px</b> = pixel (see note below)
+
+<b>Note</b>: For image related values measured in pixels (unit <b>px</b>) the resulting value will be multiplied with the
+image scale factor to allow to compensate for high-res images. For values that are not image related the unit <b>px</b>
+will be treated as a synonym for the unit <b>pt</b>.
+
+<i>Example:</i> <tt>&lt;img src="pic1.png" width="40mm" height="25mm" viewport="0 0 0 20mm"/&gt;</tt>
+
+This defines the size of the image as 40 millimeters x 25 millimeters with a viewport which moves the lower 5 millimeters
+of the image height below the baseline of the surrounding cell.
 
 \subsection simpletags Simple text markup
 
@@ -1071,10 +1230,10 @@ list item is indented.
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;ul&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>type="bullet|dash|<i>number</i>"</tt></td><td>Sets the type of the list item marker
+<tr bgcolor="#eeeeee"><td valign="top"><tt>type="bullet|dash|number"</tt></td><td>Sets the type of the list item marker
 <p><tt><b>bullet</b></tt> displays a bullet character</p>
 <p><tt><b>dash</b></tt> displays a dash character</p>
-<p><tt><i>number</i></tt> has a value between 0 and 255. The corresponding character of the \b ZapfDingBats font
+<p><tt><b>number</b></tt> has a value between 0 and 255. The corresponding character of the \b ZapfDingBats font
 is used as the list item marker</p></td></tr>
 </table>
 
@@ -1095,7 +1254,7 @@ list item is indented.
 <p><tt><b>I</b></tt> displays a uppercase roman number as the list item enumerator</p>
 <p><tt><b>z1|z2|z3|z4</b></tt> displays number symbols of one of the 4 number series in the \b ZapfDingBats font. This option should only be used for lists of at most 10 items.</p>
 </td></tr>
-<tr bgcolor="#ddeeff"><td><tt>start="<i>number</i>"</tt></td><td><i>number</i> represents the enumerator value of the first list item</td></tr>
+<tr bgcolor="#ddeeff"><td><tt>start="number"</tt></td><td><i>number</i> represents the enumerator value of the first list item</td></tr>
 </table>
 
 \subsection ptag Paragraph
@@ -1119,9 +1278,11 @@ A horizontal rule is a line of specified width which is drawn on a separate line
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;hr&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>width="<i>number</i>"</tt></td><td>The width of the horizontal rule
+<tr bgcolor="#eeeeee"><td valign="top"><tt>width="number"</tt></td><td>The width of the horizontal rule
 is an integer <i>number</i> between 1 and 100 giving the width in percent of the available width (from left to right margin).
 The default value is 100.</td></tr>
+<tr bgcolor="#ddeeff"><td valign="top"><tt>linewidth="number"</tt></td><td>The line width of the ruler.</td></tr>
+
 </table>
 
 \subsection atag Internal or external link
@@ -1133,10 +1294,10 @@ loading the referenced URL.
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;a&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td><tt>href="<i>url</i>"</tt></td><td><i>url</i> is an unified resource locator.
+<tr bgcolor="#eeeeee"><td><tt>href="url"</tt></td><td><i>url</i> is an unified resource locator.
 If <i>url</i> starts with <b>#</b> it is interpreted as a reference to an internal link anchor;
 the characters following <b>#</b> are used as the name of the anchor.</td></tr>
-<tr bgcolor="#6699dd"><td><tt>name="<i>anchor</i>"</tt></td><td><i>anchor</i> is the name of an internal link anchor.</td></tr>
+<tr bgcolor="#ddeeff"><td><tt>name="anchor"</tt></td><td><i>anchor</i> is the name of an internal link anchor.</td></tr>
 </table>
 
 <b>Note:</b> Either the <b><tt>name</tt></b> or the <b><tt>href</tt></b> attribute may be specified, but not both.
@@ -1150,10 +1311,10 @@ font size and colour can be set. Attributes not given retain their previous valu
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;font&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>face="<i>fontfamily</i>"</tt></td><td>The name of the font family. It can be the name of one of the
+<tr bgcolor="#eeeeee"><td valign="top"><tt>face="fontfamily"</tt></td><td>The name of the font family. It can be the name of one of the
 14 core fonts or the name of a font previously added by wxPdfDocument::AddFont.</td></tr>
-<tr bgcolor="#ddeeff"><td><tt>size="<i>fontsize</i>"</tt></td><td>The font size in points</td></tr>
-<tr bgcolor="#eeeeee"><td><tt>color="<i>fontcolour</i>"</tt></td><td>The font colour in HTML notation, i.e. <b><i>\#rrggbb</i></b>,
+<tr bgcolor="#ddeeff"><td><tt>size="fontsize"</tt></td><td>The font size in points</td></tr>
+<tr bgcolor="#eeeeee"><td><tt>color="fontcolour"</tt></td><td>The font colour in HTML notation, i.e. <b><i>\#rrggbb</i></b>,
 or as a named colour, i.e. <b><i>red</i></b>.</td></tr>
 </table>
 
@@ -1178,12 +1339,19 @@ In the current implementation output of an image always starts on a new line.
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;img&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>src="<i>imagefile</i>"</tt></td><td>The name of the image file.</td></tr>
-<tr bgcolor="#ddeeff"><td valign="top"><tt>width="<i>image width</i>"</tt></td><td>The width of the image measured in pixels.</td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>height="<i>image height</i>"</tt></td><td>The height of the image measured in pixels.</td></tr>
+<tr bgcolor="#eeeeee"><td valign="top"><tt>src="imagefile"</tt></td><td>The name of the image file.</td></tr>
+<tr bgcolor="#ddeeff"><td valign="top"><tt>width="image width"</tt></td><td>The width of the image measured in pixels.</td></tr>
+<tr bgcolor="#eeeeee"><td valign="top"><tt>height="image height"</tt></td><td>The height of the image measured in pixels.</td></tr>
 <tr bgcolor="#ddeeff"><td valign="top"><tt>align="left|right|center"</tt></td><td>As specified by this
 option the image will be \b left or \b right aligned, or \b centered.
 The default is \b left aligned.</td></tr>
+<tr bgcolor="#eeeeee"><td valign="top" nowrap><tt>viewport="tlx tly brx bry"</tt></td><td>The viewport into the image that should correspond
+to the actual content of the surrounding cell. The viewport is defined as a rectangular area by specifying the coordinates of
+the top left corner (<i>tlx,tly</i>) and the bottom right corner (<i>brx,bry</i>). The viewport coordinates are measured in pixels.
+The values <i>tlx</i> and <i>tly</i> may be negative, in which case the viewport will be larger than the image.
+The values <i>brx</i> and <i>bry</i> may be specified as <b><i>0</i></b>, in which case they will be replaced
+internally by the <i>width</i> and the <i>height</i> of the image.
+</td></tr>
 </table>
 
 \section tabletag Tables
@@ -1223,7 +1391,7 @@ The <b><tt>table</tt></b> tag may have the following attributes:
 <tr bgcolor="#6699dd"><td colspan="2"><b>Tag</b></td></tr>
 <tr bgcolor="#eeeeee"><td colspan="2"><b>&lt;table&gt;</b></td></tr>
 <tr bgcolor="#6699dd"><td><b>Attribute</b></td><td><b>Description</b></td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>border="<i>number</i>"</tt></td><td>Table cells may have borders on each side.
+<tr bgcolor="#eeeeee"><td valign="top"><tt>border="number"</tt></td><td>Table cells may have borders on each side.
 This attribute specifies whether cells will have borders on every side or not. This may be overriden for each individual cell.
 The attribute value consists of the combination of up to 4 letters:
 <p>\b 0 - no borders<br>
@@ -1231,7 +1399,7 @@ The attribute value consists of the combination of up to 4 letters:
 </td></tr>
 <tr bgcolor="#ddeeff"><td valign="top"><tt>align="left|right|center"</tt></td><td>Defines the horizontal alignment of the table. Default is the alignment of the surrounding context.</td></tr>
 <tr bgcolor="#eeeeee"><td><tt>valign="top|middle|bottom"</tt></td><td>Defines the vertical alignment of the table. Default is <i>top</i>.</td></tr>
-<tr bgcolor="#ddeeff"><td valign="top"><tt>cellpadding="<i>number</i>"</tt></td><td><i>Number</i> defines the padding width on each side of a cell. Default is 0.</td></tr>
+<tr bgcolor="#ddeeff"><td valign="top"><tt>cellpadding="number"</tt></td><td><i>Number</i> defines the padding width on each side of a cell. Default is 0.</td></tr>
 </table>
 
 The supported tags and their attributes are shown in the following tables:
@@ -1240,19 +1408,19 @@ The supported tags and their attributes are shown in the following tables:
 <tr bgcolor="#6699dd"><td><b>Tag</b></td><td><b>Description</b></td></tr>
 <tr bgcolor="#eeeeee"><td><tt>&lt;table&gt; ... &lt;/table&gt;</tt></td><td>Groups the definitions of column widths. Contains one or more &lt;col&gt; tags.</td></tr>
 <tr bgcolor="#eeeeee"><td><tt>&lt;colgroup&gt; ... &lt;/colgroup&gt;</tt></td><td>Groups the definitions of column widths. Contains one or more &lt;col&gt; tags.</td></tr>
-<tr bgcolor="#ddeeff"><td><tt>&lt;col width="<i>width</i>" span="<i>number</i>"&gt; ... &lt;/col&gt;</tt></td><td>
+<tr bgcolor="#ddeeff"><td><tt>&lt;col width="width" span="number"&gt; ... &lt;/col&gt;</tt></td><td>
 Defines the <i>width</i> of one or more columns. <i>number</i> specifies for how many columns the width is specified, default is 1.
 </td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>&lt;thead odd="<i>background colour for odd numbered rows</i>" even="<i>background colour for even numbered rows</i>"&gt; ... &lt;/thead&gt;</tt></td>
+<tr bgcolor="#eeeeee"><td valign="top"><tt>&lt;thead odd="background colour for odd numbered rows" even="background colour for even numbered rows"&gt; ... &lt;/thead&gt;</tt></td>
 <td>Defines a group of table header rows.
 Contains one or more &lt;tr&gt; tags. If a table does not fit on a single page these rows are repeated on each page.
 The attributes <b><tt>odd</tt></b> and <b><tt>even</tt></b> are optional.
 </td></tr>
-<tr bgcolor="#ddeeff"><td valign="top"><tt>&lt;tbody odd="<i>background colour for odd numbered rows</i>" even="<i>background colour for even numbered rows</i>"&gt; ... &lt;/tbody&gt;</tt></td>
+<tr bgcolor="#ddeeff"><td valign="top"><tt>&lt;tbody odd="background colour for odd numbered rows" even="background colour for even numbered rows"&gt; ... &lt;/tbody&gt;</tt></td>
 <td>Defines a group of table body rows. Contains one or more &lt;tr&gt; tags.
 The attributes <b><tt>odd</tt></b> and <b><tt>even</tt></b> are optional.
 </td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>&lt;tr bgcolor="<i>background colour</i>" height="<i>height</i>"&gt; ... &lt;/tr&gt;</tt></td>
+<tr bgcolor="#eeeeee"><td valign="top"><tt>&lt;tr bgcolor="background colour" height="height"&gt; ... &lt;/tr&gt;</tt></td>
 <td>Defines a table row. Contains one or more &lt;td&gt; tags.
 <p>The <i>background colour</i> may be specified in HTML notation, i.e. <b><i>\#rrggbb</i></b>,
 or as a named colour, i.e. <b><i>red</i></b>. If no background colour is given the background is transparent.</p>
@@ -1280,11 +1448,11 @@ the combination of up to 4 letters:
 .</td></tr>
 <tr bgcolor="#ddeeff"><td valign="top"><tt>align="left|right|center"</tt></td><td>Defines the horizontal alignment of the cell content. Default is <i>left</i>.</td></tr>
 <tr bgcolor="#eeeeee"><td><tt>valign="top|middle|bottom"</tt></td><td>Defines the vertical alignment of the cell content. Default is <i>top</i>.</td></tr>
-<tr bgcolor="#ddeeff"><td valign="top"><tt>bgcolor="<i>background colour</i>"</tt></td><td>The background colour of the cell in HTML notation, i.e. <b><i>\#rrggbb</i></b>,
+<tr bgcolor="#ddeeff"><td valign="top"><tt>bgcolor="background colour"</tt></td><td>The background colour of the cell in HTML notation, i.e. <b><i>\#rrggbb</i></b>,
 or as a named colour, i.e. <b><i>red</i></b>. This attribute overrides the background colour specification of the row.
 If neither a row nor a cell background colour is specified the background is transparent.</td></tr>
-<tr bgcolor="#eeeeee"><td valign="top"><tt>rowspan="<i>number</i>"</tt></td><td><i>Number</i> of rows this cell should span. Default is 1.</td></tr>
-<tr bgcolor="#ddeeff"><td valign="top"><tt>colspan="<i>number</i>"</tt></td><td><i>Number</i> of columns this cell should span. Default is 1.</td></tr>
+<tr bgcolor="#eeeeee"><td valign="top"><tt>rowspan="number"</tt></td><td><i>Number</i> of rows this cell should span. Default is 1.</td></tr>
+<tr bgcolor="#ddeeff"><td valign="top"><tt>colspan="number"</tt></td><td><i>Number</i> of columns this cell should span. Default is 1.</td></tr>
 </table>
 
 */

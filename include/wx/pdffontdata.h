@@ -38,7 +38,7 @@ class WXDLLIMPEXP_PDFDOC wxPdfGlyphListEntry
 {
 public:
   /// Default constructor
-  wxPdfGlyphListEntry() {};
+  wxPdfGlyphListEntry() : m_gid(0), m_uid(0) {};
 
   /// Destructor
   ~wxPdfGlyphListEntry() {};
@@ -156,7 +156,7 @@ public:
   *   \li contains "italic" or "oblique" the style is set to italic
   *   \li equals "b" the style is set to bold
   *   \li equals "i" the style is set to italic
-  *   \li equals "bi" or "ib" ´the style is set to bolditalic
+  *   \li equals "bi" or "ib" Â´the style is set to bolditalic
   */
   void SetStyle(const wxString& style);
 
@@ -217,6 +217,30 @@ public:
   */
   wxFont GetFont() const { return m_font; }
 #endif
+
+  /// Set associated font data buffer
+  /**
+  * \param fontBuffer the wxFont to be associated with the font
+  */
+  void SetFontBuffer(const char* fontBuffer) { m_fontBuffer = fontBuffer; }
+
+  /// Get associated font data buffer
+  /**
+  * \return the associated wxFont
+  */
+  const char* GetFontBuffer() const { return m_fontBuffer; }
+
+  /// Set the size of the associated font data buffer
+  /**
+  * \param fontBufferSize the size of the associated font data buffer
+  */
+  void SetFontBufferSize(size_t fontBufferSize) { m_fontBufferSize = fontBufferSize; }
+
+  /// Get the size of the associated font data buffer
+  /**
+  * \return the size of the associated font data buffer
+  */
+  size_t GetFontBufferSize() const { return m_fontBufferSize; }
 
   /// Set fully qualified font file name
   /**
@@ -523,6 +547,7 @@ public:
   * \param s the string for which the width should be calculated
   * \param encoding the character to glyph mapping
   * \param withKerning flag indicating whether kerning should be taken into account
+  * \param charSpacing extra amount of spacing between characters (optional)
   * \return the width of the string
   */
   virtual double GetStringWidth(const wxString& s, const wxPdfEncoding* encoding = NULL, bool withKerning = false, double charSpacing = 0) const;
@@ -543,7 +568,7 @@ public:
   * \param replace the character used to replace invalid characters
   * \return converted string
   */
-  virtual wxString ConvertToValid(const wxString& s, wxChar replace = wxS('?')) const;
+  virtual wxString ConvertToValid(const wxString& s, wxUniChar replace = wxS('?')) const;
 
   /// Convert character codes to glyph numbers
   /**
@@ -610,6 +635,32 @@ public:
                                  const wxPdfEncoding* encoding = NULL,
                                  wxPdfSortedArrayInt* usedGlyphs = NULL,
                                  wxPdfChar2GlyphMap* subsetGlyphs = NULL);
+
+  /// Write CID to GID mapping
+  /**
+  * \param mapData the output stream
+  * \param encoding the character to glyph mapping
+  * \param usedGlyphs the list of used glyphs
+  * \param subsetGlyphs the mapping of glyphs to subset glyphs
+  * \return the size of the written data
+  */
+  virtual size_t WriteCIDToGIDMap(wxOutputStream* mapData,
+                                  const wxPdfEncoding* encoding = NULL,
+                                  wxPdfSortedArrayInt* usedGlyphs = NULL,
+                                  wxPdfChar2GlyphMap* subsetGlyphs = NULL);
+
+  /// Write CID set
+  /**
+  * \param setData the output stream
+  * \param encoding the character to glyph mapping
+  * \param usedGlyphs the list of used glyphs
+  * \param subsetGlyphs the mapping of glyphs to subset glyphs
+  * \return the size of the written data
+  */
+  virtual size_t WriteCIDSet(wxOutputStream* setData,
+                             const wxPdfEncoding* encoding = NULL,
+                             wxPdfSortedArrayInt* usedGlyphs = NULL,
+                             wxPdfChar2GlyphMap* subsetGlyphs = NULL);
 
   /// Set the font description
   /**
@@ -696,9 +747,11 @@ protected:
   bool                  m_embedSupported;  ///< Flag whether embedding of the font is allowed and supported
   bool                  m_subsetSupported; ///< Flag whether subsetting of the font is allowed and supported
 
-  wxString              m_fontFileName; ///< Qualified name of the font file
-  int                   m_fontIndex;    ///< Index of the font in case of a font collection
-  wxFont                m_font;         ///< Associated wxFont object (currently used by wxMSW only)
+  wxString              m_fontFileName;    ///< Qualified name of the font file
+  int                   m_fontIndex;       ///< Index of the font in case of a font collection
+  wxFont                m_font;            ///< Associated wxFont object (currently used by wxMSW only)
+  const char*           m_fontBuffer;      ///< Associated font data buffer
+  size_t                m_fontBufferSize;  ///< Size of the associated font data buffer
 
   wxPdfGlyphWidthMap*   m_cw;    ///< Mapping of character ids to character widths
   wxPdfChar2GlyphMap*   m_gn;    ///< Mapping of character ids to glyph numbers

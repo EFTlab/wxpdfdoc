@@ -1,11 +1,12 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        pdfproperties.h
-// Purpose:
-// Author:      Ulrich Telle
-// Created:     2006-07-13
-// Copyright:   (c) Ulrich Telle
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+/*
+** Name:        pdfproperties.h
+** Purpose:     Defines and enumerations for various PDF properties
+** Author:      Ulrich Telle
+** Created:     2006-07-13
+** Copyright:   (c) 2006-2024 Ulrich Telle
+** Licence:     wxWindows licence
+** SPDX-License-Identifier: LGPL-3.0+ WITH WxWindows-exception-3.1
+*/
 
 /// \file pdfproperties.h Interface of the several wxPdfDocument property classes
 
@@ -78,7 +79,7 @@ enum
 #define wxPDF_PERMISSION_COPY     0x0010  ///< Allow text copying
 #define wxPDF_PERMISSION_ANNOT    0x0020  ///< Allow annotations
 #define wxPDF_PERMISSION_FILLFORM 0x0100  ///< Allow filling forms
-#define wxPDF_PERMISSION_EXTRACT  0x0200  ///< Allow extract text and/or garphics
+#define wxPDF_PERMISSION_EXTRACT  0x0200  ///< Allow extract text and/or graphics
 #define wxPDF_PERMISSION_ASSEMBLE 0x0400  ///< Allow assemble document
 #define wxPDF_PERMISSION_HLPRINT  0x0800  ///< Allow high resolution print
 #define wxPDF_PERMISSION_ALL      0x0F3C  ///< Allow anything
@@ -88,7 +89,9 @@ enum wxPdfEncryptionMethod
 {
   wxPDF_ENCRYPTION_RC4V1,
   wxPDF_ENCRYPTION_RC4V2,
-  wxPDF_ENCRYPTION_AESV2
+  wxPDF_ENCRYPTION_AESV2,
+  wxPDF_ENCRYPTION_AESV3,
+  wxPDF_ENCRYPTION_AESV3R6
 };
 
 /// Page box types
@@ -149,6 +152,16 @@ enum wxPdfLayout
 #define wxPDF_VIEWER_FITWINDOW       0x0008
 #define wxPDF_VIEWER_CENTERWINDOW    0x0010
 #define wxPDF_VIEWER_DISPLAYDOCTITLE 0x0020
+#define wxPDF_VIEWER_NOPRINTSCALING  0x0040
+
+/// Paper handling options
+enum wxPdfPaperHandling
+{
+  wxPDF_PAPERHANDLING_DEFAULT,
+  wxPDF_PAPERHANDLING_SIMPLEX,
+  wxPDF_PAPERHANDLING_DUPLEX_FLIP_SHORT_EDGE,
+  wxPDF_PAPERHANDLING_DUPLEX_FLIP_LONG_EDGE
+};
 
 /// Marker symbols
 enum wxPdfMarker
@@ -173,6 +186,26 @@ enum wxPdfMarker
   wxPDF_MARKER_BOWTIE_VERTICAL,
   wxPDF_MARKER_ASTERISK,
   wxPDF_MARKER_LAST  // Marks the last available marker symbol; do not use!
+};
+
+/// Pattern styles
+enum wxPdfPatternStyle
+{
+  wxPDF_PATTERNSTYLE_NONE,
+  wxPDF_PATTERNSTYLE_IMAGE,
+  wxPDF_PATTERNSTYLE_TEMPLATE,
+  // Hatch styles
+  wxPDF_PATTERNSTYLE_FIRST_HATCH,
+  wxPDF_PATTERNSTYLE_BDIAGONAL_HATCH = wxPDF_PATTERNSTYLE_FIRST_HATCH,
+  wxPDF_PATTERNSTYLE_CROSSDIAG_HATCH,
+  wxPDF_PATTERNSTYLE_FDIAGONAL_HATCH,
+  wxPDF_PATTERNSTYLE_CROSS_HATCH,
+  wxPDF_PATTERNSTYLE_HORIZONTAL_HATCH,
+  wxPDF_PATTERNSTYLE_VERTICAL_HATCH,
+  wxPDF_PATTERNSTYLE_HERRINGBONE_HATCH,
+  wxPDF_PATTERNSTYLE_BASKETWEAVE_HATCH,
+  wxPDF_PATTERNSTYLE_BRICK_HATCH,
+  wxPDF_PATTERNSTYLE_LAST_HATCH = wxPDF_PATTERNSTYLE_BRICK_HATCH
 };
 
 /// Linear gradient types

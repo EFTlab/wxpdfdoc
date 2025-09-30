@@ -313,6 +313,8 @@ public:
 #if wxUSE_UNICODE
   wxPdfFont RegisterFont(const wxFont& font, const wxString& aliasName = wxEmptyString);
 
+  wxPdfFont RegisterFont(const char* fontData, size_t fontDataSize, const wxString& aliasName = wxEmptyString);
+
   int RegisterFontCollection(const wxString& fontCollectionFileName);
 #endif
 
@@ -550,7 +552,8 @@ wxPdfFontManagerBase::RegisterFont(const wxString& fontFileName, const wxString&
   {
     wxFileName fileName(fullFontFileName);
     wxString ext = fileName.GetExt().Lower();
-    if (ext.IsSameAs(wxS("ttf")) || ext.IsSameAs(wxS("otf")) || ext.IsSameAs(wxS("ttc")))
+    if (ext.IsSameAs(wxS("ttf")) || ext.IsSameAs(wxS("otf")) || ext.IsSameAs(wxS("ttc")) ||
+        ext.IsSameAs(wxS("woff")) || ext.IsSameAs(wxS("woff2")))
     {
 #if wxUSE_UNICODE
       // TrueType font, OpenType font, or TrueType collection
@@ -661,7 +664,7 @@ wxPdfFontManagerBase::RegisterFont(const wxFont& font, const wxString& aliasName
   int width = -1;
   wxString fontDesc = font.GetNativeFontInfoUserDesc();
   wxString faceName = font.GetFaceName();
-  wxCharBuffer faceNameBuffer = faceName.ToUTF8();
+  const wxScopedCharBuffer faceNameBuffer = faceName.ToUTF8();
   const char* fontFamily = faceNameBuffer;
 
   // Check font slant
@@ -777,17 +780,8 @@ wxPdfFontManagerBase::RegisterFont(const wxFont& font, const wxString& aliasName
 #elif wxPDFMACOSX_HAS_ATSU_TEXT
   wxString fontFileName = wxEmptyString;
 
-#if wxCHECK_VERSION(2,9,0)
-  // wxWidgets 2.9.x or higher
 #if wxOSX_USE_ATSU_TEXT
   wxUint32 atsuFontID = font.MacGetATSUFontID();
-#endif
-#else // wxWidgets 2.8.x
-#ifdef __WXMAC_CLASSIC__
-  wxUint32 atsuFontID = font.GetMacATSUFontID();
-#else
-  wxUint32 atsuFontID = font.MacGetATSUFontID();
-#endif
 #endif
 
   FSSpec fileSpecification;
@@ -818,6 +812,25 @@ wxPdfFontManagerBase::RegisterFont(const wxFont& font, const wxString& aliasName
   wxLogError(wxString(wxS("wxPdfFontManagerBase::RegisterFont: ")) +
              wxString(_("Method 'RegisterFont' for wxFont instances is not available for your platform.")));
 #endif
+  return regFont;
+}
+
+wxPdfFont
+wxPdfFontManagerBase::RegisterFont(const char* fontBuffer, size_t fontBufferSize, const wxString& aliasName)
+{
+  wxPdfFont regFont;
+  wxPdfFontParserTrueType fontParser;
+  wxPdfFontData* fontData = fontParser.IdentifyFont(fontBuffer, fontBufferSize);
+  if (fontData)
+  {
+    fontData->SetAlias(aliasName);
+    if (!AddFont(fontData, regFont))
+    {
+      wxLogDebug(wxString(wxS("wxPdfFontManagerBase::RegisterFont: ")) +
+                 wxString::Format(_("wxFont '%s' already registered."), fontData->GetName().c_str()));
+      delete fontData;
+    }
+  }
   return regFont;
 }
 
@@ -1095,16 +1108,20 @@ wxPdfFontManagerBase::GetFont(const wxString& fontName, int fontStyle) const
   int searchStyle = (fontStyle & ~wxPDF_FONTSTYLE_DECORATION_MASK) & wxPDF_FONTSTYLE_MASK;
   wxPdfFontData* fontData = NULL;
 
+  // 0. Determine whether a family alias exists
+  wxPdfFontFamilyMap::const_iterator familyAliasIter = m_fontFamilyMap.end();
+  wxPdfFontAliasMap::const_iterator aliasIter = m_fontAliasMap.find(lcFontName);
+  if (aliasIter != m_fontAliasMap.end())
+  {
+    familyAliasIter = m_fontFamilyMap.find(aliasIter->second);
+  }
+
   // Check whether font name equals font family
   wxPdfFontFamilyMap::const_iterator familyIter = m_fontFamilyMap.find(lcFontName);
   if (familyIter == m_fontFamilyMap.end())
   {
-    // 1. Check family alias if given name was not a family name
-    wxPdfFontAliasMap::const_iterator aliasIter = m_fontAliasMap.find(lcFontName);
-    if (aliasIter != m_fontAliasMap.end())
-    {
-      familyIter = m_fontFamilyMap.find(aliasIter->second);
-    }
+    // 1. Use family alias (may be empty)
+    familyIter = familyAliasIter;
   }
 
   if (familyIter != m_fontFamilyMap.end())
@@ -1112,14 +1129,28 @@ wxPdfFontManagerBase::GetFont(const wxString& fontName, int fontStyle) const
     // 2. Check whether the family contains a font with the requested style
     size_t n = familyIter->second.GetCount();
     size_t j;
-    for (j = 0; j < n && fontData == NULL; ++j)
+    do
     {
-      fontData = m_fontList[familyIter->second[j]]->GetFontData();
-      if (fontData->GetStyle() != searchStyle)
+      for (j = 0; j < n && fontData == NULL; ++j)
       {
-        fontData = NULL;
+        fontData = m_fontList[familyIter->second[j]]->GetFontData();
+        if (fontData->GetStyle() != searchStyle)
+        {
+          fontData = NULL;
+        }
+      }
+      n = 0;
+      // Search in alias font family if not already searched
+      if (fontData == NULL && familyAliasIter != familyIter)
+      {
+        if (familyAliasIter != m_fontFamilyMap.end())
+        {
+          familyIter = familyAliasIter;
+          n = familyIter->second.GetCount();
+        }
       }
     }
+    while (n > 0);
   }
 
   if (fontData == NULL)
@@ -1321,7 +1352,7 @@ wxPdfFontManagerBase::InitializeCoreFonts()
                wxString::Format(_("Registering encodings for core fonts failed.")));
   }
   int j;
-  for (j = 0; gs_coreFontTable[j].name != wxEmptyString; ++j)
+  for (j = 0; gs_coreFontTable[j].name[0] != 0; ++j)
   {
     const wxPdfCoreFontDesc& coreFontDesc = gs_coreFontTable[j];
     wxString family(coreFontDesc.family);
@@ -1348,13 +1379,13 @@ wxPdfFontManagerBase::InitializeCoreFonts()
 void
 wxPdfFontManagerBase::InitializeCjkFonts()
 {
-  const wxChar* fontStyles[4] = { wxS(""), wxS(",Bold"), wxS(",Italic"), wxS(",BoldItalic") };
+  const wxStringCharType* fontStyles[4] = { wxS(""), wxS(",Bold"), wxS(",Italic"), wxS(",BoldItalic") };
   wxString fontName;
   wxString fontAlias;
   wxPdfFontDataType0* cjkFontData;
   bool ok;
   int j, k;
-  for (j = 0; gs_cjkFontTable[j].name != wxEmptyString; ++j)
+  for (j = 0; gs_cjkFontTable[j].name[0] != 0; ++j)
   {
     const wxPdfCjkFontDesc& cjkFontDesc = gs_cjkFontTable[j];
     wxPdfEncodingCheckerMap::const_iterator ecIter = m_encodingCheckerMap->find(cjkFontDesc.encoding);
@@ -1482,11 +1513,7 @@ wxPdfFontManagerBase::LoadFontFromXML(const wxString& fontFileName)
       {
         wxString fontType;
         wxXmlNode* root = fontMetrics.GetRoot();
-#if wxCHECK_VERSION(2,9,0)
         if (root->GetAttribute(wxS("type"), &fontType))
-#else
-        if (root->GetPropVal(wxS("type"), &fontType))
-#endif
         {
           if (fontType.IsSameAs(wxS("TrueType")))
           {
@@ -1716,6 +1743,19 @@ wxPdfFontManager::RegisterFont(const wxFont& font, const wxString& aliasName)
   return m_fontManagerBase->RegisterFont(font, aliasName);
 #else
   wxUnusedVar(font);
+  wxUnusedVar(aliasName);
+  return wxPdfFont();
+#endif
+}
+
+wxPdfFont
+wxPdfFontManager::RegisterFont(const char* fontData, size_t fontDataSize, const wxString& aliasName)
+{
+#if wxUSE_UNICODE
+  return m_fontManagerBase->RegisterFont(fontData, fontDataSize, aliasName);
+#else
+  wxUnusedVar(fontData);
+  wxUnusedVar(fontDataSize);
   wxUnusedVar(aliasName);
   return wxPdfFont();
 #endif

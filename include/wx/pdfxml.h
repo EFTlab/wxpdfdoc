@@ -114,10 +114,10 @@ public:
   void AppendContext(wxPdfCellContext* context);
 
   /// Remember the last character of the last chunk
-  void SetLastChar(wxChar c) { m_lastChar = c; }
+  void SetLastChar(wxUniChar c) { m_lastChar = c; }
 
   /// Get last character of previous chunk
-  wxChar GetLastChar() { return m_lastChar; }
+  wxUniChar GetLastChar() { return m_lastChar; }
 
   /// Remember the width of the last space character
   void SetLastSpaceWidth(double w) { m_spaceWidth = w; }
@@ -144,6 +144,7 @@ public:
   wxPdfTable* GetTable() { return m_table; }
 
 private:
+  
   double           m_maxWidth;        ///< maximum line width
   double           m_lineDelta;       ///< line delta measure
   wxPdfAlignment   m_hAlign;          ///< horizontal alignment
@@ -156,7 +157,7 @@ private:
   int              m_fillStyle;       ///< cell fill style
   wxPdfArrayDouble m_linewidth;       ///< list of line widths
   wxArrayInt       m_spaces;          ///< list of space counters
-  wxChar           m_lastChar;        ///< last character of a chunk
+  wxUniChar        m_lastChar;        ///< last character of a chunk
   double           m_spaceWidth;      ///< width of space character
   double           m_charSpacing;     ///< extra character spacing (default: 0)
   wxString         m_href;            ///< hyper link reference
@@ -278,15 +279,18 @@ public:
 
   /// Insert a cell into the cell array
   void InsertCell(wxPdfTableCell* c);
+  double WriteOnPage(bool writeHeader, double x, double y);
+  double WriteRowsOnPage(unsigned firstRow, unsigned lastRow, double x, double y, bool writeHeader);
+  // Add a page and return last table row on page
+  unsigned int AddPage(wxArrayInt::const_iterator iter, wxArrayInt::const_iterator endIter);
+  double WriteTable(bool writeHeader, const wxArrayInt& lastRowsOnPage, double x, double y);
 
   /// Get height of row
   double GetRowHeight(int row) { const double height = m_rowHeights[row]; return height; };
 
   /// Write table to document
   void Write();
-
-  /// Write one table row to the document
-  void WriteRow(unsigned int row, double x, double y);
+  double WriteRows(unsigned int firstRow, unsigned int lastRow, double x, double y, bool isHeaderRow);
 
   /// Set cell padding
   void SetPad(double pad) { m_pad = pad; }
@@ -309,8 +313,14 @@ public:
   /// Get total width of table
   double GetTotalWidth() { return m_totalWidth; }
 
+  /// Get height of table head
+  double GetHeadHeight() { return m_headHeight; }
+
+  /// Get height of table body
+  double GetBodyHeight() { return m_bodyHeight; }
+
   /// Get total height of table
-  double GetTotalHeight() { return m_totalHeight; }
+  double GetTotalHeight() { return m_headHeight + m_bodyHeight; }
 
   /// Set index of first header row
   void SetHeadRowFirst(unsigned int row) { m_headRowFirst = row; }
@@ -324,7 +334,42 @@ public:
   /// Set index of last body row
   void SetBodyRowLast(unsigned int row) { m_bodyRowLast = row; }
 
-private:
+private: 
+  /// write filling
+  void WriteFillingOfCell(unsigned int row, unsigned int col, double x, double y) const;
+  /// write filling
+  void WriteFillingOfRow(unsigned int row, double x, double y) const;
+  /// write filling
+  void WriteFillingOfRows(unsigned int firstRow, unsigned int lastRow, double x, double y) const;
+
+  /// write borders
+  void WriteBordersOfCell(unsigned row, unsigned int col, double x, double y);
+  /// write borders
+  void WriteBordersOfRow(unsigned int row, double x, double y);
+  /// write borders
+  void WriteBordersOfRows(unsigned int firstRow, unsigned int lastRow, double x, double y);
+
+  /// write content
+  void WriteContentOfCell(unsigned int row, unsigned int col, double x, double y, bool isHeaderRow);
+  /// write content
+  void WriteContentOfRow(unsigned int row, double x, double y, bool isHeaderRow);
+  /// write content
+  double WriteContentOfRows(unsigned int firstRow, unsigned int lastRow, double x, double y, bool isHeaderRow);
+
+  ///Calculate Rows after a page break in a table
+  ///In case of line breaks the function returns an array containing first body rows on a next page
+  ///In case of no new pages, the array is empty
+  wxArrayInt GetLastRowsOnPage() const;
+  /// Draw cell borders
+  void DrawCellBorders(double x, double y, double w, double h, wxPdfTableCell* cell) const;
+  /// Draw cell filling
+  void DrawCellFilling(double x, double y, double w, double h, wxPdfTableCell* cell) const;
+  /// Draw cell content
+  void DrawCellContent(double x, double y, bool isHeaderRow, double w, double h, wxPdfTableCell* cell);
+  /// calculate cell dimensions
+  void CalculateCellDimension(unsigned row, unsigned col, double& w, double& h,
+    wxPdfTableCell* cell) const;
+
   wxPdfDocument* m_document;     ///< document reference
   wxPdfDoubleHashMap m_minHeights;   ///< array of minimum row heights
   wxPdfDoubleHashMap m_rowHeights;   ///< array of row heights
@@ -333,7 +378,7 @@ private:
 
   double             m_maxWidth;     ///< maximum allowed width
   double             m_totalWidth;   ///< total width
-  double             m_totalHeight;  ///< total height
+  double             m_bodyHeight;   ///< total height of table body
   double             m_headHeight;   ///< total height of table header
 
   unsigned int       m_headRowFirst; ///< index of first header row

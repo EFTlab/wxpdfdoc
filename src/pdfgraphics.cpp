@@ -3,7 +3,7 @@
 // Purpose:     Implementation of wxPdfDocument graphics primitives
 // Author:      Ulrich Telle
 // Created:     2006-01-27
-// Copyright:   (c) Ulrich Telle
+// Copyright:   (c) 2006-2025 Ulrich Telle
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1435,7 +1435,7 @@ SolveCyclic(const wxPdfArrayDouble& a, const wxPdfArrayDouble& b,
   {
     bb[i] = b[i];
   }
-  // Solve A · x = rhs.
+  // Solve A Â· x = rhs.
   x.SetCount(n);
   if (!SolveTridiagonalGeneral(a, bb, c, r, x))
   {
@@ -1448,7 +1448,7 @@ SolveCyclic(const wxPdfArrayDouble& a, const wxPdfArrayDouble& b,
   u[0] = gamma;
   u[n-1] = alpha;
 
-  // Solve A · z = u.
+  // Solve A Â· z = u.
   wxPdfArrayDouble z;
   z.SetCount(n);
   if (!SolveTridiagonalGeneral(a, bb, c, u, z))
@@ -1916,9 +1916,21 @@ wxPdfDocument::StartTransform()
 }
 
 bool
+wxPdfDocument::ScaleX(double sx)
+{
+  return Scale(sx, 100);
+}
+
+bool
 wxPdfDocument::ScaleX(double sx, double x, double y)
 {
   return Scale(sx, 100, x, y);
+}
+
+bool
+wxPdfDocument::ScaleY(double sy)
+{
+  return Scale(100, sy);
 }
 
 bool
@@ -1928,22 +1940,26 @@ wxPdfDocument::ScaleY(double sy, double x, double y)
 }
 
 bool
+wxPdfDocument::ScaleXY(double s)
+{
+  return Scale(s, s);
+}
+
+bool
 wxPdfDocument::ScaleXY(double s, double x, double y)
 {
   return Scale(s, s, x, y);
 }
 
 bool
+wxPdfDocument::Scale(double sx, double sy)
+{
+  return Scale(sx, sy, m_x, m_y);
+}
+
+bool
 wxPdfDocument::Scale(double sx, double sy, double x, double y)
 {
-  if (x < 0)
-  {
-    x = m_x;
-  }
-  if (y < 0)
-  {
-    y = m_y;
-  }
   if (sx == 0 || sy == 0)
   {
     wxLogError(wxString(wxS("wxPdfDocument::Scale: ")) +
@@ -1972,15 +1988,27 @@ wxPdfDocument::Scale(double sx, double sy, double x, double y)
 }
 
 void
+wxPdfDocument::MirrorH()
+{
+  Scale(-100, 100, m_x, m_y);
+}
+
+void
 wxPdfDocument::MirrorH(double x)
 {
-  Scale(-100, 100, x);
+  Scale(-100, 100, x, m_y);
+}
+
+void
+wxPdfDocument::MirrorV()
+{
+  Scale(100, -100, m_x, m_y);
 }
 
 void
 wxPdfDocument::MirrorV(double y)
 {
-  Scale(100, -100, -1, y);
+  Scale(100, -100, m_x, y);
 }
 
 void
@@ -2008,26 +2036,23 @@ wxPdfDocument::Translate(double tx, double ty)
   tm[1] = 0;
   tm[2] = 0;
   tm[3] = 1;
-  tm[4] = tx;
-  tm[5] = (m_yAxisOriginTop) ? ty : -ty;
+  tm[4] = tx * m_k;
+  tm[5] = (m_yAxisOriginTop) ? ty * m_k : -ty * m_k;
   // translate the coordinate system
   Transform(tm);
 }
 
+void
+wxPdfDocument::Rotate(double angle)
+{
+  Rotate(angle, m_x, m_y);
+}
 void
 wxPdfDocument::Rotate(double angle, double x, double y)
 {
   if (m_inTransform == 0)
   {
     StartTransform();
-  }
-  if (x < 0)
-  {
-    x = m_x;
-  }
-  if (y < 0)
-  {
-    y = m_y;
   }
   y *= m_k;
   x *= m_k;
@@ -2068,9 +2093,21 @@ wxPdfDocument::Transform( double a, double b, double c, double d, double tx, dou
 }
 
 bool
+wxPdfDocument::SkewX(double xAngle)
+{
+  return Skew(xAngle, 0, m_x, m_y);
+}
+
+bool
 wxPdfDocument::SkewX(double xAngle, double x, double y)
 {
   return Skew(xAngle, 0, x, y);
+}
+
+bool
+wxPdfDocument::SkewY(double yAngle)
+{
+  return Skew(0, yAngle, m_x, m_y);
 }
 
 bool
@@ -2080,16 +2117,14 @@ wxPdfDocument::SkewY(double yAngle, double x, double y)
 }
 
 bool
+wxPdfDocument::Skew(double xAngle, double yAngle)
+{
+  return Skew(xAngle, yAngle, m_x, m_y);
+}
+
+bool
 wxPdfDocument::Skew(double xAngle, double yAngle, double x, double y)
 {
-  if (x < 0)
-  {
-    x = m_x;
-  }
-  if (y < 0)
-  {
-    y = m_y;
-  }
   if (xAngle <= -90 || xAngle >= 90 || yAngle <= -90 || yAngle >= 90)
   {
     wxLogError(wxString(wxS("wxPdfDocument::Skew: ")) +

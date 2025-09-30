@@ -9,14 +9,15 @@
 
 /// \file pdffont.h Interface of wxPdfFont class
 
-#ifndef _PDF_FONT_H_
-#define _PDF_FONT_H_
+#ifndef PDF_FONT_H_
+#define PDF_FONT_H_
 
 // wxWidgets headers
 #include <wx/mstream.h>
 
 // wxPdfDocument headers
 #include "wx/pdfdocdef.h"
+#include "wx/pdfarraytypes.h"
 #include "wx/pdffontdescription.h"
 #include "wx/pdfproperties.h"
 
@@ -183,7 +184,7 @@ public :
   * \param replace the character used to replace invalid characters
   * \return converted string
   */
-  wxString ConvertToValid(const wxString& s, wxChar replace = wxS('?')) const;
+  wxString ConvertToValid(const wxString& s, wxUniChar replace = wxS('?')) const;
 
   /// Get list of supported glyph names
   /**
