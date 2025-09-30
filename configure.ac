@@ -42,7 +42,6 @@ AC_ARG_ENABLE(utilities,
              [BUILD_UTILITIES=1])
 AM_CONDITIONAL([BUILD_UTILITIES], [test -n "$BUILD_UTILITIES"])
 
-LT_INIT([win32-dll])
 AC_ARG_WITH([zint-builtin],
     [AS_HELP_STRING([--with-zint-builtin],
         [Use builtin Zint library])],
@@ -113,6 +112,7 @@ AC_LINK_IFELSE(
 LIBS="$SAVE_LIBS"
 AC_LANG_POP([C++])
 
+LT_INIT([win32-dll])
 dnl Allow adding MSW-specific fragments to the makefile.
 case "${host}" in
     *-*-cygwin* )
@@ -266,6 +266,7 @@ AC_CONFIG_LINKS([samples/pdfdc/smile.jpg:samples/pdfdc/smile.jpg
 ])
 
 fi
+
 ZINT_LIBS=
 if [test x$haveZint = xtrue && test "x$with_zint_builtin" = xno]; then
 ZINT_LIBS=-lzint
